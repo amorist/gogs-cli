@@ -12,6 +12,7 @@ import (
 func init() {
 	repoCmd.AddCommand(listReposCmd)
 	listReposCmd.Flags().StringP("name", "n", "", "User name")
+	listReposCmd.Flags().StringP("org_name", "o", "", "Org name")
 }
 
 var repoCmd = &cobra.Command{
@@ -28,14 +29,17 @@ var listReposCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var repositorys []*gogs.Repository
 		var err error
-		var name string
+		var name, orgName string
 
 		name, err = cmd.Flags().GetString("name")
+		orgName, err = cmd.Flags().GetString("org_name")
 
-		if name == "" {
+		if name == "" && orgName == "" {
 			repositorys, err = client.ListMyRepos()
-		} else {
+		} else if name != "" {
 			repositorys, err = client.ListUserRepos(name)
+		} else if orgName != "" {
+			repositorys, err = client.ListOrgRepos(orgName)
 		}
 
 		if err != nil {
